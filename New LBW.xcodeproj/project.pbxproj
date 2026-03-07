@@ -7,19 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F4DB0AC12F54510E0022240D /* New_LBWApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4DB0AC02F54510E0022240D /* New_LBWApp.swift */; };
-		F4DB0AC32F54510E0022240D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4DB0AC22F54510E0022240D /* ContentView.swift */; };
+		F4DB0AC12F54510E0022240D /* New_LBWApp_Master.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4DB0AC02F54510E0022240D /* New_LBWApp_Master.swift */; };
 		F4DB0AC52F54510F0022240D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F4DB0AC42F54510F0022240D /* Assets.xcassets */; };
 		F4DB0AC82F54510F0022240D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F4DB0AC72F54510F0022240D /* Preview Assets.xcassets */; };
+		F4DB0AF82F54597F0022240D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4DB0AC22F54510E0022240D /* ContentView.swift */; };
+		F4DB0AFA2F5459880022240D /* CricketVideoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4DB0AF32F54575D0022240D /* CricketVideoPicker.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		F4DB0ABD2F54510E0022240D /* New LBW.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "New LBW.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		F4DB0AC02F54510E0022240D /* New_LBWApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = New_LBWApp.swift; sourceTree = "<group>"; };
+		F4DB0AC02F54510E0022240D /* New_LBWApp_Master.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = New_LBWApp_Master.swift; sourceTree = "<group>"; };
 		F4DB0AC22F54510E0022240D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		F4DB0AC42F54510F0022240D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F4DB0AC72F54510F0022240D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		F4DB0AC92F54510F0022240D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F4DB0AF32F54575D0022240D /* CricketVideoPicker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CricketVideoPicker.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,8 +54,9 @@
 		F4DB0ABF2F54510E0022240D /* New LBW */ = {
 			isa = PBXGroup;
 			children = (
-				F4DB0AC02F54510E0022240D /* New_LBWApp.swift */,
+				F4DB0AC02F54510E0022240D /* New_LBWApp_Master.swift */,
 				F4DB0AC22F54510E0022240D /* ContentView.swift */,
+				F4DB0AF32F54575D0022240D /* CricketVideoPicker.swift */,
 				F4DB0AC42F54510F0022240D /* Assets.xcassets */,
 				F4DB0AC92F54510F0022240D /* Info.plist */,
 				F4DB0AC62F54510F0022240D /* Preview Content */,
@@ -138,8 +141,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F4DB0AC32F54510E0022240D /* ContentView.swift in Sources */,
-				F4DB0AC12F54510E0022240D /* New_LBWApp.swift in Sources */,
+				F4DB0AF82F54597F0022240D /* ContentView.swift in Sources */,
+				F4DB0AFA2F5459880022240D /* CricketVideoPicker.swift in Sources */,
+				F4DB0AC12F54510E0022240D /* New_LBWApp_Master.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

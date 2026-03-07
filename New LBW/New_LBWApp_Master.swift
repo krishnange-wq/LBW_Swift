@@ -8,7 +8,7 @@
 import SwiftUI
 
 @main
-struct New_LBWApp: App {
+struct LBW_app: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
