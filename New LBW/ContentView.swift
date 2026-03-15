@@ -6,13 +6,14 @@ struct ContentView: View {
     @State private var showingPicker = false
     @State private var player = AVPlayer()
     @State private var nativeSize: CGSize = CGSize(width: 1, height: 1)
+    @State private var isLHB = false
+    @State private var showingSpecsAlert = false // Tracker for the popup
 
     var body: some View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
             if let url = videoURL {
-                // Pass the actual local URL so we can upload the file later
-                VideoAnalysisView(player: player, nativeSize: nativeSize, showingPicker: $showingPicker, videoURL: url)
+                VideoAnalysisView(player: player, nativeSize: nativeSize, showingPicker: $showingPicker, videoURL: url, isLHB: $isLHB)
             } else {
                 VStack(spacing: 30) {
                     Image(systemName: "video.circle.fill")
@@ -25,10 +26,10 @@ struct ContentView: View {
                             .foregroundColor(.gray)
                         
                         VStack(alignment: .leading, spacing: 8) {
-                            HStack { Circle().fill(Color.red).frame(width: 8, height: 8); Text("1. Top Left (Far Crease)") }
-                            HStack { Circle().fill(Color.red).frame(width: 8, height: 8); Text("2. Top Right (Far Crease)") }
-                            HStack { Circle().fill(Color.red).frame(width: 8, height: 8); Text("3. Bottom Right (Near Crease)") }
-                            HStack { Circle().fill(Color.yellow).frame(width: 8, height: 8); Text("4. Bottom Left (Near Crease)") }
+                            HStack { Circle().fill(Color.red).frame(width: 8, height: 8); Text("1. Top Left") }
+                            HStack { Circle().fill(Color.red).frame(width: 8, height: 8); Text("2. Top Right") }
+                            HStack { Circle().fill(Color.red).frame(width: 8, height: 8); Text("3. Bottom Right") }
+                            HStack { Circle().fill(Color.yellow).frame(width: 8, height: 8); Text("4. Bottom Left") }
                         }
                         .font(.system(.subheadline, design: .monospaced))
                         .foregroundColor(.white)
@@ -47,6 +48,21 @@ struct ContentView: View {
                     }
                 }
             }
+        }
+        // --- Added Alert & OnAppear Logic ---
+        .onAppear {
+            if !UserDefaults.standard.bool(forKey: "didShowSpecs") {
+                self.showingSpecsAlert = true
+            }
+        }
+        .alert(isPresented: $showingSpecsAlert) {
+            Alert(
+                title: Text("Optimal Video Settings"),
+                message: Text("For accurate DRS results, please use:\n• 1080p Resolution\n• 60  FPS\n• Portrait Orientation\n• .mov file format"),
+                dismissButton: .default(Text("Got it!")) {
+                    UserDefaults.standard.set(true, forKey: "didShowSpecs")
+                }
+            )
         }
         .sheet(isPresented: $showingPicker) {
             CricketVideoPicker(videoURL: $videoURL)
@@ -69,17 +85,17 @@ struct VideoAnalysisView: View {
     let player: AVPlayer
     let nativeSize: CGSize
     @Binding var showingPicker: Bool
-    let videoURL: URL // Changed from videoName to videoURL
+    let videoURL: URL
+    @Binding var isLHB: Bool
     
     @State private var points: [CGPoint] = []
     @State private var currentScale: CGFloat = 1.0
     @GestureState private var pinchScale: CGFloat = 1.0
-    
     @State private var rawBackendData: [String: Any] = [:]
     @State private var showingResult = false
     @State private var isAnalyzing = false
     
-    // Replace with your Mac's IP Address
+    // Remember to update this to your https:// Render URL when you go live!
     let apiURL = "http://127.0.0.1:5000/analyze"
     
     private let precisionX: CGFloat = 0.986
@@ -100,10 +116,6 @@ struct VideoAnalysisView: View {
                         if let tracked = pathData["tracked_points"] as? [[CGFloat]] {
                             BallPathShape(points: tracked.map { CGPoint(x: $0[0], y: $0[1]) }, videoRect: videoRect, nativeSize: nativeSize, pX: precisionX, pY: precisionY)
                                 .stroke(Color.yellow, lineWidth: 3)
-                        }
-                        if let future = pathData["future_points"] as? [[CGFloat]] {
-                            BallPathShape(points: future.map { CGPoint(x: $0[0], y: $0[1]) }, videoRect: videoRect, nativeSize: nativeSize, pX: precisionX, pY: precisionY)
-                                .stroke(Color.red, style: StrokeStyle(lineWidth: 3, dash: [5]))
                         }
                     }
 
@@ -129,44 +141,31 @@ struct VideoAnalysisView: View {
                 .scaleEffect(totalScale)
                 
                 VStack {
-                    Spacer()
-                    if showingResult {
-                        VStack(spacing: 12) {
-                            Text(rawBackendData["final_DRS_verdict"] as? String ?? "N/A")
-                                .font(.system(size: 36, weight: .black, design: .rounded))
-                                .foregroundColor(.white)
-                            
-                            if let stages = rawBackendData["stages"] as? [String: Any] {
-                                HStack(spacing: 20) {
-                                    VerdictCapsule(label: "PITCH", val: (stages["pitching"] as? [String: Any])?["verdict"] as? String ?? "-")
-                                    VerdictCapsule(label: "IMPACT", val: (stages["impact"] as? [String: Any])?["verdict"] as? String ?? "-")
-                                    VerdictCapsule(label: "WICKETS", val: (stages["wickets"] as? [String: Any])?["verdict"] as? String ?? "-")
-                                }
-                            }
-                        }
-                        .padding(25)
-                        .background(BlurView(style: .systemUltraThinMaterialDark).cornerRadius(20))
-                        .padding(.bottom, 60)
-                        .onTapGesture { withAnimation(.easeOut) { self.showingResult = false } }
-                        .transition(AnyTransition.move(edge: .bottom).combined(with: .opacity))
-                    }
-                }
-
-                VStack {
-                    HStack {
+                    HStack(spacing: 10) {
                         Button("Reset") {
                             self.points = []; self.showingResult = false; self.currentScale = 1.0; self.rawBackendData = [:]; self.isAnalyzing = false
                         }
-                        .padding().background(Color.red).foregroundColor(.white).cornerRadius(10)
+                        .font(.system(size: 10, weight: .bold))
+                        .padding(10).background(Color.red).foregroundColor(.white).cornerRadius(8)
+                        
+                        Button(action: { self.isLHB.toggle() }) {
+                            Text(isLHB ? "LHB" : "RHB")
+                                .font(.system(size: 10, weight: .bold))
+                                .padding(10)
+                                .frame(width: 50)
+                                .background(isLHB ? Color.purple : Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                        }
                         
                         Spacer()
                         
                         if points.count == 4 {
                             Button(action: { self.uploadToBackend() }) {
-                                Text(isAnalyzing ? "..." : "SEND TO PYTHON")
+                                Text(isAnalyzing ? "..." : "SEND")
                                     .font(.system(size: 12, weight: .bold))
-                                    .padding().background(isAnalyzing ? Color.gray : Color.green)
-                                    .foregroundColor(.white).cornerRadius(10)
+                                    .padding(10).background(isAnalyzing ? Color.gray : Color.green)
+                                    .foregroundColor(.white).cornerRadius(8)
                             }
                             .disabled(isAnalyzing)
                         }
@@ -176,7 +175,8 @@ struct VideoAnalysisView: View {
                         Button("New Video") {
                             self.points = []; self.rawBackendData = [:]; self.isAnalyzing = false; self.showingPicker = true
                         }
-                        .padding().background(Color.blue).foregroundColor(.white).cornerRadius(10)
+                        .font(.system(size: 10, weight: .bold))
+                        .padding(10).background(Color.blue).foregroundColor(.white).cornerRadius(8)
                     }
                     .padding(.top, 44).padding(.horizontal)
                     Spacer()
@@ -188,45 +188,47 @@ struct VideoAnalysisView: View {
         .edgesIgnoringSafeArea(.all)
     }
 
-    // --- REPLACED: Web Server Upload Logic ---
     func uploadToBackend() {
         self.isAnalyzing = true
-        self.showingResult = false
-        
-        // 1. Prepare Coordinates
         let coordData = points.map { ["x": Int($0.x), "y": Int($0.y)] }
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: coordData),
-              let jsonString = String(data: jsonData, encoding: .utf8) else { return }
+        let payload: [String: Any] = ["coordinates": coordData, "isLHB": self.isLHB]
+        
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: payload),
+              let jsonString = String(data: jsonData, encoding: .utf8),
+              let videoData = try? Data(contentsOf: videoURL) else {
+            self.isAnalyzing = false
+            return
+        }
 
-        // 2. Prepare Multipart Request
         let boundary = "Boundary-\(UUID().uuidString)"
         var request = URLRequest(url: URL(string: apiURL)!)
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
 
         var body = Data()
-        
-        // Add Coordinates part
-        body.append("--\(boundary)\r\nContent-Disposition: form-data; name=\"coordinates\"\r\n\r\n\(jsonString)\r\n".data(using: .utf8)!)
-
-        // Add Video part
-        let filename = videoURL.lastPathComponent.lowercased().replacingOccurrences(of: ".mov", with: "") + ".mov"
-        body.append("--\(boundary)\r\nContent-Disposition: form-data; name=\"video\"; filename=\"\(filename)\"\r\nContent-Type: video/quicktime\r\n\r\n".data(using: .utf8)!)
-        if let videoData = try? Data(contentsOf: videoURL) {
-            body.append(videoData)
+        if let bData = "--\(boundary)\r\n".data(using: .utf8),
+           let dDisp = "Content-Disposition: form-data; name=\"data\"\r\n\r\n".data(using: .utf8),
+           let jData = "\(jsonString)\r\n".data(using: .utf8),
+           let bNext = "--\(boundary)\r\n".data(using: .utf8),
+           let filename = videoURL.lastPathComponent.lowercased().data(using: .utf8),
+           let vDisp = "Content-Disposition: form-data; name=\"video\"; filename=\"".data(using: .utf8),
+           let vEndHeader = "\"\r\nContent-Type: video/quicktime\r\n\r\n".data(using: .utf8),
+           let vTrailing = "\r\n".data(using: .utf8),
+           let bFinal = "--\(boundary)--\r\n".data(using: .utf8) {
+            
+            body.append(bData); body.append(dDisp); body.append(jData); body.append(bNext)
+            body.append(vDisp); body.append(filename); body.append(vEndHeader)
+            body.append(videoData); body.append(vTrailing); body.append(bFinal)
         }
-        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+
         request.httpBody = body
 
-        // 3. Send and Receive Response
         URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
                 self.isAnalyzing = false
                 if let data = data, let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
                     self.rawBackendData = json
                     withAnimation(.spring()) { self.showingResult = true }
-                } else {
-                    print("Upload failed: \(error?.localizedDescription ?? "Unknown error")")
                 }
             }
         }.resume()
@@ -258,7 +260,7 @@ struct VideoAnalysisView: View {
     }
 }
 
-// --- KEEPING YOUR SHAPES & HELPERS INTACT ---
+// Helper Shapes
 struct BallPathShape: Shape {
     var points: [CGPoint]; var videoRect: CGRect; var nativeSize: CGSize; var pX: CGFloat; var pY: CGFloat
     func path(in rect: CGRect) -> Path {
@@ -272,22 +274,6 @@ struct BallPathShape: Shape {
         for i in 1..<mapped.count { path.addLine(to: mapped[i]) }
         return path
     }
-}
-
-struct VerdictCapsule: View {
-    let label: String; let val: String
-    var body: some View {
-        VStack(spacing: 4) {
-            Text(label).font(.system(size: 10, weight: .bold)).foregroundColor(.gray)
-            Text(val).font(.system(size: 14, weight: .bold)).foregroundColor(.white).lineLimit(1)
-        }
-    }
-}
-
-struct BlurView: UIViewRepresentable {
-    var style: UIBlurEffect.Style
-    func makeUIView(context: Context) -> UIVisualEffectView { UIVisualEffectView(effect: UIBlurEffect(style: style)) }
-    func updateUIView(_ uiView: UIVisualEffectView, context: Context) {}
 }
 
 struct PitchShape: Shape {
