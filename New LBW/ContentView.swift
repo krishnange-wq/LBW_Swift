@@ -96,7 +96,7 @@ struct VideoAnalysisView: View {
     @State private var isAnalyzing = false
     
     // Remember to update this to your https:// Render URL when you go live!
-    let apiURL = "http://127.0.0.1:5000/analyze"
+    let apiURL = "https://lbw-app-render.onrender.com"
     
     private let precisionX: CGFloat = 0.986
     private let precisionY: CGFloat = 1.018
