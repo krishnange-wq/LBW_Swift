@@ -27,7 +27,7 @@ struct ContentView: View {
                     }.padding().background(Color.white.opacity(0.1)).cornerRadius(15)
 
                     Button(action: { self.showingPicker = true }) {
-                        Text("Select 4k 60fps .mov Video").font(Font.title2.bold()).padding().background(Color.blue).foregroundColor(.white).cornerRadius(15)
+                        Text("Select 4k 60fps .mov Video (White Ball").font(Font.title2.bold()).padding().background(Color.blue).foregroundColor(.white).cornerRadius(15)
                     }
                 }
             }
@@ -63,8 +63,8 @@ struct VideoAnalysisView: View {
     @State private var showingResult = false
     @State private var isAnalyzing = false
     
-    //let apiURL = "https://drs-backend-qso2ch3qpa-lz.a.run.app/analyze"
-    let apiURL = "http://127.0.0.1:5003/analyze"
+    let apiURL = "https://drs-backend-qso2ch3qpa-lz.a.run.app/analyze"
+    //let apiURL = "http://127.0.0.1:5003/analyze"
     private let precisionX: CGFloat = 0.986
     private let precisionY: CGFloat = 1.018
 
