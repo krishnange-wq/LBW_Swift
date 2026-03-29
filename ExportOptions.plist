@@ -9,7 +9,7 @@
 	<key>provisioningProfiles</key>
 	<dict>
 		<key>com.Sidd.New-LBW</key>
-		<string>New_LBW_AppStore_Manual</string>
+		<string>New LBW App Store Profile</string>
 	</dict>
 	<key>signingCertificate</key>
 	<string>Apple Distribution</string>
