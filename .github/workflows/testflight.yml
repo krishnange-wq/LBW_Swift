@@ -17,7 +17,6 @@ jobs:
         run: |
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
           echo -n "$PROV_BASE64" | base64 --decode -o "$HOME/Library/MobileDevice/Provisioning Profiles/New_LBW_App_Store_Profile.mobileprovision"
-          # Map UUID so Xcode 12.4 can find the profile by its internal ID
           UUID=$(grep -aA1 UUID "$HOME/Library/MobileDevice/Provisioning Profiles/New_LBW_App_Store_Profile.mobileprovision" | grep -oE "[-A-Z0-9]{36}" || echo "")
           if [ ! -z "$UUID" ]; then
             cp "$HOME/Library/MobileDevice/Provisioning Profiles/New_LBW_App_Store_Profile.mobileprovision" "$HOME/Library/MobileDevice/Provisioning Profiles/$UUID.mobileprovision"
@@ -32,9 +31,15 @@ jobs:
           security create-keychain -p "build-pass" build.keychain
           security set-keychain-settings -lut 21600 build.keychain
           security unlock-keychain -p "build-pass" build.keychain
-          security import $RUNNER_TEMP/cert.p12 -k build.keychain -P "$CERT_PASSWORD" -T /usr/bin/codesign
-          # This line prevents the "Permission Popup" hang we saw earlier
+          
+          # Use -A and -T to ensure the codesign utility has full permission
+          security import $RUNNER_TEMP/cert.p12 -k build.keychain -P "$CERT_PASSWORD" -A -T /usr/bin/codesign
+          
+          # Manually allow the codesign partition
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "build-pass" build.keychain
+          
+          # FORCE the system to prioritize our build.keychain
+          security list-keychains -d user -s build.keychain $(security list-keychains -d user | xargs)
 
       - name: Build Archive
         run: |
@@ -43,7 +48,9 @@ jobs:
             -scheme "New LBW" \
             -sdk iphoneos \
             -archivePath $RUNNER_TEMP/NewLBW.xcarchive \
-            -configuration Release
+            -configuration Release \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="Apple Distribution"
 
       - name: Export IPA
         run: |
