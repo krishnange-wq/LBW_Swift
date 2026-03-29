@@ -18,15 +18,9 @@ jobs:
           if [ -z "$PROV_BASE64" ]; then echo "ERROR: Profile Secret Missing"; exit 1; fi
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
           echo -n "$PROV_BASE64" | base64 --decode -o "$HOME/Library/MobileDevice/Provisioning Profiles/New_LBW_App_Store_Profile.mobileprovision"
-          
-          # Attempt UUID extraction but don't fail the build if it flickers
           UUID=$(grep -aA1 UUID "$HOME/Library/MobileDevice/Provisioning Profiles/New_LBW_App_Store_Profile.mobileprovision" | grep -oE "[-A-Z0-9]{36}" || echo "")
-          
           if [ ! -z "$UUID" ]; then
             cp "$HOME/Library/MobileDevice/Provisioning Profiles/New_LBW_App_Store_Profile.mobileprovision" "$HOME/Library/MobileDevice/Provisioning Profiles/$UUID.mobileprovision"
-            echo "Successfully mapped UUID: $UUID"
-          else
-            echo "Warning: Could not extract UUID. Proceeding with filename-based signing."
           fi
 
       - name: Setup Certificate
@@ -34,10 +28,15 @@ jobs:
           CERT_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
           CERT_PASSWORD: ${{ secrets.P12_PASSWORD }}
         run: |
-          if [ -z "$CERT_BASE64" ]; then echo "ERROR: Certificate Secret Missing"; exit 1; fi
+          if [ -z "$CERT_BASE64" ]; then echo "ERROR: Cert Secret Missing"; exit 1; fi
           echo -n "$CERT_BASE64" | base64 --decode -o $RUNNER_TEMP/cert.p12
           security create-keychain -p "build-pass" build.keychain
+          # KEY FIXES START HERE:
+          security set-keychain-settings -lut 21600 build.keychain
+          security unlock-keychain -p "build-pass" build.keychain
           security import $RUNNER_TEMP/cert.p12 -k build.keychain -P "$CERT_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "build-pass" build.keychain
+          # KEY FIXES END HERE
           security list-keychains -d user -s build.keychain
 
       - name: Build Archive
