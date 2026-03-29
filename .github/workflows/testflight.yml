@@ -1,4 +1,5 @@
 name: Deploy to TestFlight
+
 on:
   push:
     branches: [ main ]
@@ -10,13 +11,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-     - name: Setup Provisioning
+      - name: Setup Provisioning
         env:
           PROV_BASE64: ${{ secrets.BUILD_PROVISION_PROFILE_BASE64 }}
         run: |
           mkdir -p "~/Library/MobileDevice/Provisioning Profiles"
           echo -n "$PROV_BASE64" | base64 --decode -o "~/Library/MobileDevice/Provisioning Profiles/New LBW App Store Profile.mobileprovision"
-          
+
       - name: Setup Certificate
         env:
           CERT_BASE64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
