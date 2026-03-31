@@ -1,0 +1,26 @@
+name: Swift Build Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    # Use macos-11 for Xcode 12.4 compatibility
+    runs-on: macos-11
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Select Xcode 12.4
+        run: sudo xcode-select -s /Applications/Xcode_12.4.app/Contents/Developer
+
+      - name: Build for Simulator
+        run: |
+          xcodebuild build \
+            -scheme YourProjectSchemeName \
+            -destination 'platform=iOS Simulator,name=iPhone 12,OS=14.4' \
+            -allowProvisioningUpdates
