@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     # Use macos-11 for Xcode 12.4 compatibility
-    runs-on: macos-11
+    runs-on: macos-14
 
     steps:
       - name: Checkout code
