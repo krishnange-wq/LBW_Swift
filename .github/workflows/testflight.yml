@@ -3,7 +3,7 @@ name: Deploy to TestFlight
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # Added so you can trigger it manually from the Actions tab
+  workflow_dispatch: 
 
 jobs:
   deploy:
@@ -12,11 +12,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # --- FORCING THE BUILD NUMBER TO 64 ---
+      # --- FORCING THE BUILD NUMBER TO 65 ---
       - name: Force Build Version
         run: |
-          echo "Setting Build Version to 64..."
-          find . -name "Info.plist" -exec plutil -replace CFBundleVersion -string "64" {} \;
+          echo "Setting Build Version to 65..."
+          find . -name "Info.plist" -exec plutil -replace CFBundleVersion -string "65" {} \;
           find . -name "Info.plist" -exec plutil -replace CFBundleShortVersionString -string "1.0" {} \;
 
       - name: Setup Provisioning
@@ -51,7 +51,7 @@ jobs:
             -sdk iphoneos \
             -archivePath $RUNNER_TEMP/NewLBW.xcarchive \
             -configuration Release \
-            CURRENT_PROJECT_VERSION=64 \
+            CURRENT_PROJECT_VERSION=65 \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Distribution"
 
@@ -65,8 +65,8 @@ jobs:
       - name: Upload to TestFlight
         uses: apple-actions/upload-testflight-build@v3
         with:
-          # Using wildcard *.ipa to find the file regardless of the internal PRODUCT_NAME change
-          app-path: ${{ runner.temp }}/build/*.ipa
+          # Hard-coding the new name because altool hates wildcards
+          app-path: ${{ runner.temp }}/build/HowzApp.ipa
           issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
           api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
           api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
