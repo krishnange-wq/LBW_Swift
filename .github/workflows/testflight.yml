@@ -3,6 +3,7 @@ name: Deploy to TestFlight
 on:
   push:
     branches: [ main ]
+  workflow_dispatch: # Added so you can trigger it manually from the Actions tab
 
 jobs:
   deploy:
@@ -10,6 +11,13 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      # --- NEW STEP: FORCES THE BUILD NUMBER TO 55 ---
+      - name: Force Build Version
+        run: |
+          echo "Setting Build Version to 55..."
+          find . -name "Info.plist" -exec plutil -replace CFBundleVersion -string "55" {} \;
+          find . -name "Info.plist" -exec plutil -replace CFBundleShortVersionString -string "1.0" {} \;
 
       - name: Setup Provisioning
         env:
@@ -31,14 +39,8 @@ jobs:
           security create-keychain -p "build-pass" build.keychain
           security set-keychain-settings -lut 21600 build.keychain
           security unlock-keychain -p "build-pass" build.keychain
-          
-          # Use -A and -T to ensure the codesign utility has full permission
           security import $RUNNER_TEMP/cert.p12 -k build.keychain -P "$CERT_PASSWORD" -A -T /usr/bin/codesign
-          
-          # Manually allow the codesign partition
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "build-pass" build.keychain
-          
-          # FORCE the system to prioritize our build.keychain
           security list-keychains -d user -s build.keychain $(security list-keychains -d user | xargs)
 
       - name: Build Archive
@@ -49,6 +51,7 @@ jobs:
             -sdk iphoneos \
             -archivePath $RUNNER_TEMP/NewLBW.xcarchive \
             -configuration Release \
+            CURRENT_PROJECT_VERSION=55 \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Distribution"
 
