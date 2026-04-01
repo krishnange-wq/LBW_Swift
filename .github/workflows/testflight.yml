@@ -14,8 +14,8 @@ jobs:
 
       - name: Force Build Version
         run: |
-          echo "Setting Build Version to 66..."
-          find . -name "Info.plist" -exec plutil -replace CFBundleVersion -string "66" {} \;
+          echo "Setting Build Version to 67..."
+          find . -name "Info.plist" -exec plutil -replace CFBundleVersion -string "67" {} \;
           find . -name "Info.plist" -exec plutil -replace CFBundleShortVersionString -string "1.0" {} \;
 
       - name: Setup Provisioning
@@ -50,7 +50,7 @@ jobs:
             -sdk iphoneos \
             -archivePath $RUNNER_TEMP/NewLBW.xcarchive \
             -configuration Release \
-            CURRENT_PROJECT_VERSION=66 \
+            CURRENT_PROJECT_VERSION=67 \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Distribution"
 
