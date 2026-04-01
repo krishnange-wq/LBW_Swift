@@ -18,7 +18,7 @@ struct ContentView: View {
                 VStack(spacing: 30) {
                     Image(systemName: "video.circle.fill").font(.system(size: 80)).foregroundColor(.blue)
                     VStack(spacing: 12) {
-                        Text("Click corners (longer creaes) in order:").font(.headline).foregroundColor(.gray)
+                        Text("Click corners (longer creases) in order:").font(.headline).foregroundColor(.gray)
                         VStack(alignment: .leading, spacing: 8) {
                             HStack { Circle().fill(Color.red).frame(width: 8, height: 8); Text("1. Top Left") }
                             HStack { Circle().fill(Color.red).frame(width: 8, height: 8); Text("2. Top Right") }
@@ -28,7 +28,7 @@ struct ContentView: View {
                     }.padding().background(Color.white.opacity(0.1)).cornerRadius(15)
 
                     Button(action: { self.showingPicker = true }) {
-                        Text("Select 4k 60fps .mov Video (White Ball").font(Font.title2.bold()).padding().background(Color.blue).foregroundColor(.white).cornerRadius(15)
+                        Text("Select 4k 60fps .mov Video (White Ball)").font(Font.title2.bold()).padding().background(Color.blue).foregroundColor(.white).cornerRadius(15)
                     }
                 }
             }
