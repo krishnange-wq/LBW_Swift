@@ -12,11 +12,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # --- FORCING THE BUILD NUMBER TO 65 ---
       - name: Force Build Version
         run: |
-          echo "Setting Build Version to 65..."
-          find . -name "Info.plist" -exec plutil -replace CFBundleVersion -string "65" {} \;
+          echo "Setting Build Version to 66..."
+          find . -name "Info.plist" -exec plutil -replace CFBundleVersion -string "66" {} \;
           find . -name "Info.plist" -exec plutil -replace CFBundleShortVersionString -string "1.0" {} \;
 
       - name: Setup Provisioning
@@ -51,7 +50,7 @@ jobs:
             -sdk iphoneos \
             -archivePath $RUNNER_TEMP/NewLBW.xcarchive \
             -configuration Release \
-            CURRENT_PROJECT_VERSION=65 \
+            CURRENT_PROJECT_VERSION=66 \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Distribution"
 
@@ -62,11 +61,19 @@ jobs:
             -exportOptionsPlist ExportOptions.plist \
             -exportPath $RUNNER_TEMP/build
 
+      # --- NEW DIAGNOSTIC STEP ---
+      - name: Check Build Folder
+        run: |
+          echo "Listing files in build folder:"
+          ls -R $RUNNER_TEMP/build
+          # This saves the full path of the IPA to a variable
+          echo "IPA_PATH=$(find $RUNNER_TEMP/build -name "*.ipa" | head -n 1)" >> $GITHUB_ENV
+
       - name: Upload to TestFlight
         uses: apple-actions/upload-testflight-build@v3
         with:
-          # Hard-coding the new name because altool hates wildcards
-          app-path: ${{ runner.temp }}/build/HowzApp.ipa
+          # This uses the variable we just created to find the file automatically
+          app-path: ${{ env.IPA_PATH }}
           issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
           api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
           api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
