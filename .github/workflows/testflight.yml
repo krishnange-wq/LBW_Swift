@@ -12,11 +12,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # --- NEW STEP: FORCES THE BUILD NUMBER TO 55 ---
+      # --- NEW STEP: FORCES THE BUILD NUMBER TO 56 ---
       - name: Force Build Version
         run: |
-          echo "Setting Build Version to 55..."
-          find . -name "Info.plist" -exec plutil -replace CFBundleVersion -string "55" {} \;
+          echo "Setting Build Version to 56..."
+          find . -name "Info.plist" -exec plutil -replace CFBundleVersion -string "56" {} \;
           find . -name "Info.plist" -exec plutil -replace CFBundleShortVersionString -string "1.0" {} \;
 
       - name: Setup Provisioning
@@ -51,7 +51,7 @@ jobs:
             -sdk iphoneos \
             -archivePath $RUNNER_TEMP/NewLBW.xcarchive \
             -configuration Release \
-            CURRENT_PROJECT_VERSION=55 \
+            CURRENT_PROJECT_VERSION=56 \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Distribution"
 
